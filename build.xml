@@ -8,24 +8,24 @@
 <project name="karibu-tutorial" default="help" basedir="."
 	 xmlns:ivy="antlib:org.apache.ivy.ant">
 
-  <property name="lib.dir" value="lib" />
-  <property name="build.dir" value="build" />
-  <property name="src.dir" value="src" />  
-  <property name="test.dir" value="test" />
-  <property name="resource.dir" value="setting"/>
+	<property name="lib.dir" value="lib" />
+	<property name="build.dir" value="build" />
+	<property name="src.dir" value="src" />
+	<property name="test.dir" value="test" />
+	<property name="resource.dir" value="setting"/>
 
 
-  <!-- paths used for compilation and run  -->
-  <path id="lib.path.id">
-    <fileset dir="${lib.dir}" />
-  </path>
-  <path id="run.path.id">
-    <path refid="lib.path.id" />
-    <path location="${build.dir}" />
-  </path>
+	<!-- paths used for compilation and run  -->
+	<path id="lib.path.id">
+		<fileset dir="${lib.dir}" />
+	</path>
+	<path id="run.path.id">
+		<path refid="lib.path.id" />
+		<path location="${build.dir}" />
+	</path>
 
-  <target name="help">
-    <echo>
+	<target name="help">
+		<echo>
 Karibu Tutorial
 
   *** Please read the 'helloworld' tutorial first ***
@@ -58,112 +58,119 @@ Karibu Tutorial
     load:        Start generating client side data.
      
     </echo>
-  </target>
-  
-  <target name="clean">
-    <delete dir="${build.dir}"/>
-    <delete dir="${lib.dir}"/>
-  </target>
-  
-  <target name="prepare">
-    <mkdir dir="${build.dir}"/>
-    <mkdir dir="${lib.dir}"/>
-  </target>
+	</target>
 
-  <!-- Ivy tasks -->
-  <target name="resolve" 
+	<target name="clean">
+		<delete dir="${build.dir}"/>
+		<delete dir="${lib.dir}"/>
+	</target>
+
+	<target name="prepare">
+		<mkdir dir="${build.dir}"/>
+		<mkdir dir="${lib.dir}"/>
+	</target>
+
+	<!-- Ivy tasks -->
+	<target name="resolve" 
 	  description="--> retreive dependencies with ivy">
-    <ivy:retrieve/>
-  </target>    
-  <target name="report" depends="resolve" 
+		<ivy:retrieve/>
+	</target>
+	<target name="report" depends="resolve" 
 	  description="--> generates a report of dependencies">
-    <ivy:report todir="${build.dir}"/>
-  </target>
+		<ivy:report todir="${build.dir}"/>
+	</target>
 
-  <!-- compilation tasks -->
-  <target name="build-test" depends="prepare,resolve">
-    <javac srcdir="${test.dir}"
+	<!-- compilation tasks -->
+	<target name="build-test" depends="prepare,resolve">
+		<javac srcdir="${test.dir}"
 	   destdir="${build.dir}"
 	   debug="on" 
 	   classpathref="lib.path.id" 
 	   includeAntRuntime="false">
-    </javac>
-  </target>
+		</javac>
+	</target>
 
-  <!-- setting tasks for the quick start -->
-  <target name="copy-resource" depends="prepare">
-    <copy file="${resource.dir}/log4j.properties" todir="${build.dir}"/>
-  </target>
+	<!-- setting tasks for the quick start -->
+	<target name="copy-resource" depends="prepare">
+		<copy file="${resource.dir}/log4j.properties" todir="${build.dir}"/>
+	</target>
 
-  <target name="build-all" depends="build-test,copy-resource"/>
+	<target name="build-all" depends="build-test,copy-resource"/>
 
 
-  <!-- Stage 1 -->
-  <target name="test" depends="build-test"
+	<!-- Stage 1 -->
+	<target name="test" depends="build-test"
 	  description="--> Execute the stage 1 test cases">
-    <junit printsummary="yes" fork="yes" haltonfailure="yes">
-      <formatter type="plain"/>
-      <test name="cs.karibu.helloworld.stage1.TestRoundtrip"/>
-      <classpath>
-	<path refid="run.path.id"/>
-      </classpath>
-    </junit>
-  </target>
+		<junit printsummary="yes" fork="yes" haltonfailure="yes">
+			<formatter type="plain"/>
+			<test name="cs.karibu.helloworld.stage1.TestRoundtrip"/>
+			<classpath>
+				<path refid="run.path.id"/>
+			</classpath>
+		</junit>
+	</target>
 
-  <!-- Stage 2 -->
-  
-  <!-- Define the IP of the machine with a running RabbitMQ -->
-  <property name="mq.ip" value="localhost"/>
+	<!-- Stage 2 -->
 
-  <target name="prod" depends="build-test"
+	<!-- Define the IP of the machine with a running RabbitMQ -->
+	<property name="mq.ip" value="localhost"/>
+
+	<target name="prod" depends="build-test"
 	  description="---> Stage 2 - produce three items of data">
-    <java classpathref="run.path.id" 
+		<java classpathref="run.path.id" 
 	  classname="cs.karibu.helloworld.stage2.Producer">
-      <arg value="${mq.ip}"/>
-    </java>
-  </target>
-  <target name="cons" depends="build-test"
+			<arg value="${mq.ip}"/>
+		</java>
+	</target>
+	<target name="cons" depends="build-test"
 	  description="--> Stage 2 - consume items and output to shell">
-    <java classpathref="run.path.id" 
+		<java classpathref="run.path.id" 
 	  classname="cs.karibu.helloworld.stage2.Consumer">
-      <arg value="${mq.ip}"/>
-    </java>
-  </target>
+			<arg value="${mq.ip}"/>
+		</java>
+	</target>
 
-  <!-- Quick start -->
-  <property name="pf" value="config"/>
-  <property name="maxprsec" value="1"/>
-  <!-- For real production you have to set this to the IP/DNS of the
+	<!-- Quick start -->
+	<property name="pf" value="config"/>
+	<property name="maxprsec" value="1"/>
+	<!-- For real production you have to set this to the IP/DNS of the
        machine which runs the daemon. -->
-  <property name="rmiserver" value="localhost"/>
-  
-  <target name="load" depends="build-all"
-	  description="---> Quick start - the load generator">
-    <java classpathref="run.path.id" 
-	  classname="cs.karibu.quickstart.GenerateLoad">
-      <arg value="${pf}"/>
-      <arg value="${maxprsec}"/>
-    </java>
-  </target>
+	<property name="rmiserver" value="localhost"/>
 
-  <target name="daemon" depends="build-all"
-	  description="---> Quick start - Run the daemon">
-    <java classpathref="run.path.id" 
-	  classname="dk.au.cs.karibu.main.StorageDaemon">
-      <arg value="mongo"/>
-      <arg value="${pf}"/>
-      <sysproperty key="java.security.policy"
+	<target name="load" depends="build-all"
+	  description="---> Quick start - the load generator">
+		<java classpathref="run.path.id" 
+	  classname="cs.karibu.quickstart.GenerateLoad">
+			<arg value="${pf}"/>
+			<arg value="${maxprsec}"/>
+		</java>
+	</target>
+
+	<target name="load-sam" depends="build-all"
+      description="---> Quick start - the load generator">
+		<java classpathref="run.path.id" classname="cs.karibu.quickstart.GenerateSAMLoad">
+			<arg value="${pf}" />
+			<arg value="${maxprsec}" />
+		</java>
+	</target>
+
+
+	<target name="daemon" depends="build-all" description="---> Quick start - Run the daemon">
+		<java classpathref="run.path.id" classname="dk.au.cs.karibu.main.StorageDaemon">
+			<arg value="mongo"/>
+			<arg value="${pf}"/>
+			<sysproperty key="java.security.policy"
            path="setting/security.policy"/>
-      <sysproperty key="com.sun.management.jmxremote.port"
+			<sysproperty key="com.sun.management.jmxremote.port"
            value="4672"/>
-      <sysproperty key="com.sun.management.jmxremote.authenticate"
+			<sysproperty key="com.sun.management.jmxremote.authenticate"
            value="false"/>
-      <sysproperty key="com.sun.management.jmxremote.ssl"
+			<sysproperty key="com.sun.management.jmxremote.ssl"
            value="false"/>
-      <sysproperty key="java.rmi.server.hostname"
+			<sysproperty key="java.rmi.server.hostname"
            value="${rmiserver}"/>
-    </java>
-  </target>
+		</java>
+	</target>
 
 
 
